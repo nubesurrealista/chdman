@@ -28,7 +28,6 @@ install_manifest.txt
 build.ninja
 
 # unix intermediate files
-config.h
 *.o
 *.a
 *.so

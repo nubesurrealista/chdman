@@ -1,1 +1,1 @@
-#define VERSION "1.4.3"
+#define PACKAGE_VERSION "1.4.3"
