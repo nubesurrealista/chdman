@@ -35,14 +35,6 @@ set(ALL_SOURCE_FILES
 	${zstd_dir}/dictBuilder/zdict.c
 )
 
-if (MSVC)
-    add_compile_options(-DZSTD_DISABLE_ASM)
-else ()
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "amd64.*|AMD64.*|x86_64.*|X86_64.*")
-        set(ALL_SOURCE_FILES ${ALL_SOURCE_FILES} ${zstd_dir}/decompress/huf_decompress_amd64.S)
-    else()
-        add_compile_options(-DZSTD_DISABLE_ASM)
-    endif()
-endif ()
+add_compile_options(-DZSTD_DISABLE_ASM)
 
 add_library(zstd STATIC ${ALL_SOURCE_FILES})

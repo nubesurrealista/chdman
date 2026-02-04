@@ -61,6 +61,6 @@ add_library(flac STATIC
     ${flac_dir}/src/libFLAC/stream_encoder.c
     ${flac_dir}/src/libFLAC/version.rc
     ${flac_dir}/src/libFLAC/window.c
-    $<$<BOOL:${WIN32}>:{flac_dir}/include/share/win_utf8_io.h>
-    $<$<BOOL:${WIN32}>:{flac_dir}/src/share/win_utf8_io/win_utf8_io.c>
+    $<$<BOOL:${WIN32}>:${flac_dir}/include/share/win_utf8_io.h>
+    $<$<BOOL:${WIN32}>:${flac_dir}/src/share/win_utf8_io/win_utf8_io.c>
 )
