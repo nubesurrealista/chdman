@@ -54,7 +54,7 @@ target_compile_definitions(chdman PRIVATE
   BARE_VCS_REVISION="${vcs_revision}"
 )
 
-target_link_libraries(chdman PRIVATE expat 7z ocore_sdl zlib zstd flac utf8proc utils)
+target_link_libraries(chdman PRIVATE utils expat 7z ocore_sdl zlib zstd flac utf8proc)
 
 if(UNIX)
 target_link_libraries(chdman PRIVATE pthread util)
