@@ -43,11 +43,12 @@
 
 #pragma once
 
-#include <cstdlib>
-#include <vector>
-#include <string>
-
 #include "coretmpl.h"
+
+#include <cstdlib>
+#include <span>
+#include <string>
+#include <vector>
 
 
 //**************************************************************************
@@ -109,7 +110,7 @@ public:
 		}
 
 		// accessors
-		const option_type type() const { return m_type; }
+		option_type type() const { return m_type; }
 		int parameter() const { return m_parameter; }
 		const char *identifier() const { return m_identifier; }
 		const char *display_name() const { return m_display_name; }
@@ -122,7 +123,7 @@ public:
 	};
 
 	// methods
-	const util::contiguous_sequence_wrapper<const entry> &entries() const { return m_entries; }
+	const std::span<const entry> &entries() const { return m_entries; }
 
 protected:
 	option_guide(const entry *begin, size_t count)
@@ -132,7 +133,7 @@ protected:
 
 
 private:
-	util::contiguous_sequence_wrapper<const entry> m_entries;
+	std::span<const entry> m_entries;
 };
 
 // ======================> option_guide_impl

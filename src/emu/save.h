@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 
@@ -34,7 +35,6 @@ enum save_error
 {
 	STATERR_NONE,
 	STATERR_NOT_FOUND,
-	STATERR_ILLEGAL_REGISTRATIONS,
 	STATERR_INVALID_HEADER,
 	STATERR_READ_ERROR,
 	STATERR_WRITE_ERROR,
@@ -160,6 +160,7 @@ public:
 	rewinder *rewind() { return m_rewind.get(); }
 	int registration_count() const { return m_entry_list.size(); }
 	bool registration_allowed() const { return m_reg_allowed; }
+	bool supported() const { return m_supported; }
 
 	// registration control
 	void allow_registration(bool allowed = true);
@@ -300,9 +301,9 @@ public:
 	{ save_pointer(nullptr, "global", nullptr, index, std::forward<ItemType>(value), element, valname, count); }
 
 	// file processing
-	static save_error check_file(running_machine &machine, emu_file &file, const char *gamename, void (CLIB_DECL *errormsg)(const char *fmt, ...));
-	save_error write_file(emu_file &file);
-	save_error read_file(emu_file &file);
+	static std::pair<save_error, std::string> check_file(running_machine &machine, util::core_file &file, const char *gamename);
+	save_error write_file(util::core_file &file);
+	save_error read_file(util::core_file &file);
 
 	save_error write_stream(std::ostream &str);
 	save_error read_stream(std::istream &str);
@@ -328,13 +329,13 @@ private:
 	save_error do_read(T check_length, U read_block, V start_header, W start_data);
 	u32 signature() const;
 	void dump_registry() const;
-	static save_error validate_header(const u8 *header, const char *gamename, u32 signature, void (CLIB_DECL *errormsg)(const char *fmt, ...), const char *error_prefix);
+	static std::pair<save_error, std::string> validate_header(const u8 *header, const char *gamename, u32 signature);
 
 	// internal state
 	running_machine &         m_machine;              // reference to our machine
 	std::unique_ptr<rewinder> m_rewind;               // rewinder
 	bool                      m_reg_allowed;          // are registrations allowed?
-	s32                       m_illegal_regs;         // number of illegal registrations
+	bool                      m_supported;            // are saved states supported?
 
 	std::vector<std::unique_ptr<state_entry>>    m_entry_list;       // list of registered entries
 	std::vector<std::unique_ptr<ram_state>>      m_ramstate_list;    // list of ram states
