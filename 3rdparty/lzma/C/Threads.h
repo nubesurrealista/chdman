@@ -13,8 +13,6 @@
 #if !defined(__APPLE__) && !defined(_AIX) && !defined(__ANDROID__)
 #ifndef Z7_AFFINITY_DISABLE
 #define Z7_AFFINITY_SUPPORTED
-// #pragma message(" ==== Z7_AFFINITY_SUPPORTED")
-// #define _GNU_SOURCE
 #endif
 #endif
 #endif
@@ -37,11 +35,8 @@ typedef HANDLE CThread;
 #define Thread_CONSTRUCT(p) { *(p) = NULL; }
 #define Thread_WasCreated(p) (*(p) != NULL)
 #define Thread_Close(p) HandlePtr_Close(p)
-// #define Thread_Wait(p) Handle_WaitObject(*(p))
 
 #ifdef UNDER_CE
-  // if (USE_THREADS_CreateThread is      defined), we use _beginthreadex()
-  // if (USE_THREADS_CreateThread is not definned), we use CreateThread()
   #define USE_THREADS_CreateThread
 #endif
 
@@ -72,7 +67,6 @@ typedef struct
 #define Thread_CONSTRUCT(p)   { (p)->_tid = 0;  (p)->_created = 0; }
 #define Thread_WasCreated(p)  ((p)->_created != 0)
 WRes Thread_Close(CThread *p);
-// #define Thread_Wait Thread_Wait_Close
 
 typedef void * THREAD_FUNC_RET_TYPE;
 #define THREAD_FUNC_RET_ZERO  NULL
@@ -82,10 +76,11 @@ typedef UInt64 CAffinityMask;
 
 #ifdef Z7_AFFINITY_SUPPORTED
 
-typedef cpu_set_t CCpuSet;
-#define CpuSet_Zero(p)        CPU_ZERO(p)
-#define CpuSet_Set(p, cpu)    CPU_SET(cpu, p)
-#define CpuSet_IsSet(p, cpu)  CPU_ISSET(cpu, p)
+/* Patch for musl libc (Alpine Linux) - cpu_set_t does not exist */
+typedef UInt64 CCpuSet;
+#define CpuSet_Zero(p)        *(p) = (0)
+#define CpuSet_Set(p, cpu)    *(p) |= ((UInt64)1 << (cpu))
+#define CpuSet_IsSet(p, cpu)  ((*(p) & ((UInt64)1 << (cpu))) != 0)
 
 #else
 
@@ -103,22 +98,7 @@ typedef UInt64 CCpuSet;
 #define THREAD_FUNC_CALL_TYPE Z7_STDCALL
 
 #if defined(_WIN32) && defined(__GNUC__)
-/* GCC compiler for x86 32-bit uses the rule:
-   the stack is 16-byte aligned before CALL instruction for function calling.
-   But only root function main() contains instructions that
-   set 16-byte alignment for stack pointer. And another functions
-   just keep alignment, if it was set in some parent function.
-   
-   The problem:
-    if we create new thread in MinGW (GCC) 32-bit x86 via _beginthreadex() or CreateThread(),
-       the root function of thread doesn't set 16-byte alignment.
-       And stack frames in all child functions also will be unaligned in that case.
-   
-   Here we set (force_align_arg_pointer) attribute for root function of new thread.
-   Do we need (force_align_arg_pointer) also for another systems?  */
-  
   #define THREAD_FUNC_ATTRIB_ALIGN_ARG __attribute__((force_align_arg_pointer))
-  // #define THREAD_FUNC_ATTRIB_ALIGN_ARG // for debug : bad alignment in SSE functions
 #else
   #define THREAD_FUNC_ATTRIB_ALIGN_ARG
 #endif
